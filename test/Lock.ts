@@ -10,27 +10,38 @@ describe("Lock", function () {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
+
+  // this async function contains a snapshot of the delpoyment state
+  // it houses all pre-initialized variables
   async function deployOneYearLockFixture() {
     const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
     const ONE_GWEI = 1_000_000_000;
 
     const lockedAmount = ONE_GWEI;
     const unlockTime = (await time.latest()) + ONE_YEAR_IN_SECS;
+    const unlockTime2 = await time.latest();
 
     // Contracts are deployed using the first signer/account by default
     const [owner, otherAccount] = await hre.ethers.getSigners();
 
+    // creating an instance of a contract type
     const Lock = await hre.ethers.getContractFactory("Lock");
+
+    // deploying the contract instance created above
     const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
 
-    return { lock, unlockTime, lockedAmount, owner, otherAccount };
+    return { lock, unlockTime, lockedAmount, owner, otherAccount, unlockTime2 };
   }
 
   describe("Deployment", function () {
     it("Should set the right unlockTime", async function () {
-      const { lock, unlockTime } = await loadFixture(deployOneYearLockFixture);
+      const { lock, unlockTime, unlockTime2 } = await loadFixture(
+        deployOneYearLockFixture
+      );
 
       expect(await lock.unlockTime()).to.equal(unlockTime);
+
+      expect(await lock.unlockTime()).to.not.equal(unlockTime2);
     });
 
     it("Should set the right owner", async function () {
