@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@openzeppelin/foundry-upgrades": "^0.4.0"
+  }
+}
